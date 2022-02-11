@@ -114,6 +114,22 @@ func probeHandler(w http.ResponseWriter, r *http.Request, c *config.Config, logg
 		http.Error(w, "Target parameter is missing", http.StatusBadRequest)
 		return
 	}
+	
+	// 请求body
+	headers := make(map[string]string)
+	for key, value := range params {
+		if strings.HasPrefix(key, "HTTP.Header") && len(value) == 1 {
+			content := key[12 :]
+			headers[content] = value[0]
+		}
+	}
+	module.HTTP.Headers = headers
+
+	// 请求参数
+	body := params.Get("body")
+	if body != "" {
+		module.HTTP.Body = body
+	}
 
 	prober, ok := Probers[module.Prober]
 	if !ok {
